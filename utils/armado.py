@@ -157,13 +157,7 @@ def construir(capturado: dict, contexto: dict, consecutivo: int,
         ],
         "cajas": contexto.get("cajas"),
         "ultimas_celdas": contexto.get("ultimas_celdas"),
-        "fotos": [
-            {
-                "image_bytes": fotos_bytes.get(f["filename"]),
-                "descripcion": f["descripcion"],
-            }
-            for f in (capturado.get("fotos") or [])[: TOPES["fotos"][0]]
-        ],
+        "fotos": _ubicar_fotos(capturado.get("fotos") or [], fotos_bytes),
     }
 
     # Detalle resuelto, para que la app pueda mostrarlo antes de generar
@@ -194,6 +188,44 @@ def _avisar_sobre_ejecucion(items, avisos):
                 f"{total_hoy:g} {it['unidad']} pero solo quedan {pendiente:g} "
                 f"pendientes de {contractual:g}."
             )
+
+
+def _ubicar_fotos(fotos: list[dict], blobs: dict[str, bytes]) -> list[dict]:
+    """
+    Coloca cada foto en su slot del registro fotográfico.
+
+    Si el formulario trae un picker por posición (multiphoto_picker_1..10), el
+    slot manda: así una foto faltante deja su hueco en blanco en vez de correr
+    todas las demás una posición. Sin slot, se colocan en orden de llegada.
+    """
+    tope = TOPES["fotos"][0]
+    ubicadas: list[dict | None] = [None] * tope
+    sin_slot = []
+
+    for f in fotos:
+        slot = f.get("slot")
+        if slot and 1 <= slot <= tope and ubicadas[slot - 1] is None:
+            ubicadas[slot - 1] = f
+        else:
+            sin_slot.append(f)
+
+    for f in sin_slot:                      # rellenar los huecos que queden
+        for i in range(tope):
+            if ubicadas[i] is None:
+                ubicadas[i] = f
+                break
+
+    # Recortar los huecos del final para no crear slots vacíos de más
+    while ubicadas and ubicadas[-1] is None:
+        ubicadas.pop()
+
+    return [
+        {
+            "image_bytes": blobs.get(f["filename"]) if f else None,
+            "descripcion": f["descripcion"] if f else "",
+        }
+        for f in ubicadas
+    ]
 
 
 def _avisar_sobre_cantidad_personal(mano_obra, avisos):

@@ -194,7 +194,11 @@ def parse_submission(file_bytes) -> dict:
         headers = [c.value for c in ws[1]]
 
         if _es_picker_fotos(headers, nombre):
-            datos["fotos"].extend(_leer_fotos(_filas(ws)))
+            # Cada picker corresponde a un slot del registro fotográfico. El
+            # número va en el nombre de la hoja, y hay que leerlo: el orden de
+            # wb.sheetnames es alfabético, así que 'multiphoto_picker_10'
+            # aparece justo después del 1 y su foto caería en el slot 2.
+            datos["fotos"].extend(_leer_fotos(_filas(ws), _slot_del_picker(nombre)))
             continue
 
         clave = _clasificar(headers)
@@ -225,6 +229,22 @@ def parse_submission(file_bytes) -> dict:
                     break
             if datos["motivos_disponibilidad"]:
                 break
+
+    # Un picker por slot: ordenar por destino. Si vienen de un pool común
+    # (slot=None) se respeta el orden de llegada.
+    if any(f.get("slot") for f in datos["fotos"]):
+        datos["fotos"].sort(key=lambda f: (f.get("slot") is None, f.get("slot") or 0))
+
+    # ── Observaciones sueltas en Root: 'Observacion #1' ... '#N' ────────────
+    if not datos["observaciones"] and hoja_root:
+        filas = _filas(wb[hoja_root])
+        if filas:
+            sueltas = []
+            for k, v in filas[0].items():
+                m = re.match(r"^\s*observacion\s*#?\s*(\d+)\s*$", norm(k))
+                if m and v is not None and str(v).strip():
+                    sueltas.append((int(m.group(1)), str(v).strip()))
+            datos["observaciones"] = [t for _, t in sorted(sueltas)]
 
     _validar_topes(datos)
     return datos
@@ -386,7 +406,16 @@ def _es_picker_fotos(headers, nombre) -> bool:
     return "photo" in nh or "multiphoto" in norm(nombre) or "foto" in norm(nombre)
 
 
-def _leer_fotos(filas) -> list[dict]:
+_NUM_PICKER = re.compile(r"(\d+)\s*$")
+
+
+def _slot_del_picker(nombre: str) -> int | None:
+    """'multiphoto_picker_7' -> 7. None si el nombre no lleva número."""
+    m = _NUM_PICKER.search(nombre)
+    return int(m.group(1)) if m else None
+
+
+def _leer_fotos(filas, slot: int | None = None) -> list[dict]:
     out = []
     for f in filas:
         archivo = _buscar(f, "Photo", "Foto", "Imagen")
@@ -397,6 +426,9 @@ def _leer_fotos(filas) -> list[dict]:
             "descripcion": str(
                 _buscar(f, "Comment", "Descripcion de la foto", "Descripcion") or ""
             ).strip(),
+            # Slot destino cuando el formulario tiene un picker por posición.
+            # None = pool común, se colocan en orden de llegada.
+            "slot":        slot,
         })
     return out
 
