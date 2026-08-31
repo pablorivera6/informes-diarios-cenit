@@ -40,30 +40,22 @@ st.markdown(Path("assets/estilos.css").read_text(encoding="utf-8"), unsafe_allow
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# Control de acceso
+# Control de acceso (opcional)
 #
-# Streamlit Community Cloud publica la app en una URL pública: cualquiera que la
-# tenga puede usarla. Y esta app guarda las credenciales de FastField del lado
-# del servidor, así que sin puerta cualquiera podría bajar los medios de la
-# organización subiendo un submission cualquiera.
+# Por defecto la app queda ABIERTA: quien tenga la URL entra directo.
+#
+# Si algún día quieres cerrarla, basta con definir `app_password` en los secrets
+# (Streamlit Cloud: Settings -> Secrets). No hay que tocar código: en cuanto esa
+# clave existe, la app empieza a pedirla.
+#
+# Ten presente que con la app abierta, las credenciales de FastField que viven
+# en los secrets quedan utilizables por cualquiera que tenga el enlace.
 # ═════════════════════════════════════════════════════════════════════════════
 
 def _puerta() -> bool:
     clave = secreto("app_password")
-
     if not clave:
-        st.markdown(
-            '<div class="bloqueo"><div class="bloqueo-icono">!</div>'
-            '<div class="bloqueo-cuerpo">'
-            '<div class="bloqueo-titulo">La app está sin proteger</div>'
-            '<div class="bloqueo-texto">No hay <code>app_password</code> configurada. '
-            'En local no importa, pero si esto está publicado en una URL, cualquiera '
-            'que la tenga puede usar las credenciales de FastField.</div>'
-            '</div></div>',
-            unsafe_allow_html=True,
-        )
-        return True
-
+        return True                      # sin contraseña configurada: acceso libre
     if st.session_state.get("autenticado"):
         return True
 
