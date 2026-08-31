@@ -235,16 +235,24 @@ def parse_submission(file_bytes) -> dict:
     if any(f.get("slot") for f in datos["fotos"]):
         datos["fotos"].sort(key=lambda f: (f.get("slot") is None, f.get("slot") or 0))
 
-    # ── Observaciones sueltas en Root: 'Observacion #1' ... '#N' ────────────
-    if not datos["observaciones"] and hoja_root:
+    # ── Pies de foto sueltos en Root: 'Observacion #1' ... '#N' ────────────
+    #
+    # El formulario numera estos campos igual que los pickers de foto (uno por
+    # slot), así que son los pies de foto, NO la sección OBSERVACIONES del
+    # informe, que tiene 8 líneas y va en B722:B729.
+    if hoja_root:
         filas = _filas(wb[hoja_root])
         if filas:
-            sueltas = []
+            pies = {}
             for k, v in filas[0].items():
                 m = re.match(r"^\s*observacion\s*#?\s*(\d+)\s*$", norm(k))
                 if m and v is not None and str(v).strip():
-                    sueltas.append((int(m.group(1)), str(v).strip()))
-            datos["observaciones"] = [t for _, t in sorted(sueltas)]
+                    pies[int(m.group(1))] = str(v).strip()
+            # Solo rellenan lo que el picker dejó vacío en su campo Comment
+            for f in datos["fotos"]:
+                if not f.get("descripcion") and f.get("slot") in pies:
+                    f["descripcion"] = pies[f["slot"]]
+            datos["pies_sueltos"] = pies
 
     _validar_topes(datos)
     return datos

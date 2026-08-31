@@ -134,10 +134,22 @@ Multimetro · Telurometro · Planta Electrica
 
 ## Página 7 — Registro fotográfico · máx. **10**
 
+El formulario usa **un picker por posición**: `multiphoto_picker_1` … `_10`.
+Cada uno alimenta su slot del formato, y el pie de foto va en un campo aparte
+de `Root`, numerado igual.
+
 | # | Pregunta | Tipo | Destino |
 |---|---|---|---|
-| 23 | **Fotos del día** | Multi Photo Picker | `2. Reg.Fotográfico`, 10 slots |
-| 24 | **Descripción de la foto** | Campo `Comment` del picker | Pie de cada foto |
+| 23 | **Foto del slot N** | Multi Photo Picker (uno por slot) | `2. Reg.Fotográfico`, slot N |
+| 24 | **Observacion #N** | Texto en `Root` | Pie de la foto del slot N |
+
+El slot se toma del **número del picker**, no del orden de las hojas: al
+exportar, FastField las ordena alfabéticamente y `multiphoto_picker_10` queda
+justo después del 1. Si falta una foto, su hueco queda en blanco en lugar de
+correr las demás.
+
+El campo `Comment` del picker también sirve como pie; si viene lleno, tiene
+prioridad sobre `Observacion #N`.
 
 La fecha del pie ya es fórmula en la plantilla, no hay que capturarla.
 
@@ -148,10 +160,12 @@ La fecha del pie ya es fórmula en la plantilla, no hay que capturarla.
 | # | Pregunta | Tipo | Destino |
 |---|---|---|---|
 | 25 | **Motivos de disponibilidad de personal o equipos** | Multilínea, opcional | B713 |
-| 26 | **Observaciones** | Multilínea, repetible máx. **8** | B722 … B729 |
+| 26 | **Observaciones del informe** | Multilínea, repetible máx. **8** | B722 … B729 |
 
-La 25 conviene condicionarla a que alguien haya reportado horas disponible o
-fuera de servicio.
+> **Ojo con la 26:** no la confundas con `Observacion #N`, que son los pies de
+> foto. Esta es la sección OBSERVACIONES del cuerpo del informe y hoy **no
+> existe en el formulario**, así que ese bloque sale vacío. Para llenarlo hace
+> falta un subformulario repetible cuyo campo se llame `Observación`.
 
 ---
 
@@ -164,8 +178,8 @@ en el Excel y se perdería en silencio**. La app avisa si llegan de más.
 |---|---|---|
 | Actividades ejecutadas | 28 | G662:G689 |
 | Jornada de trabajo | 2 | filas 718-719 |
-| Observaciones | 8 | B722:B729 |
-| Fotos | 10 | 10 slots |
+| Observaciones del informe | 8 | B722:B729 |
+| Fotos y sus pies | 10 | 10 slots |
 | Ítems / mano de obra / equipos | sin tope | matrices ocultas |
 
 ---
