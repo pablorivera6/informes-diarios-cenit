@@ -1,0 +1,30 @@
+# Secrets — NUNCA subir al repositorio
+.streamlit/secrets.toml
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# Entornos virtuales
+.env
+.venv
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# Archivos temporales de Excel
+~$*.xlsx
+*.tmp
+
+# Salidas de prueba
+salida_prueba_*.xlsx
+salida_prueba_*.xlsx
+
+# Informes generados (pesan ~9.5 MB cada uno)
+informe_*.xlsx
+*.xlsx.bak
+.DS_Store

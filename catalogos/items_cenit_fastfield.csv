@@ -1,0 +1,89 @@
+﻿Label,Item,Especialidad,Cod_SAP,Und
+002 — PK-47+128 · Movilización y desmovilización  [Und],2,CIV,3000672,Und
+003 — PK-47+128 · Elaboración de la Ingeniería de Detalle en línea  [Und],3,COR,3000933,Und
+"004 — PK-47+128 · Diagnóstico, modelamiento y mitigación de interferencias en línea  [km]",4,COR,3026527,km
+005 — PK-47+128 · Complementación de ingeniería básica elaboración de la ingeniería para construcción en línea  [Und],5,COR,3026501,Und
+006 — PK-321+100 · Movilización y desmovilización  [Und],6,CIV,3000672,Und
+007 — PK-321+100 · Elaboración de la Ingeniería de Detalle en línea  [Und],7,COR,3000933,Und
+008 — PK-152+428 · Campamento de obra (Instalaciones temporales)  [Und],8,CIV,3001334,Und
+009 — PK-152+428 · Identificación de estructuras enterradas  [m²],9,CIV,3001545,m²
+010 — PK-152+428 · Instalación y tendido de cable de Protección Catódica  [m],10,ELE,3001496,m
+011 — PK-152+428 · Suministro e instalacion de estacion de prueba en linea  [Und],11,COR,3012259,Und
+013 — PK-47+128 · Movilización y desmovilización  [Und],13,CIV,3000672,Und
+014 — PK-47+128 · Campamento de obra (Instalaciones temporales)  [Und],14,CIV,3001334,Und
+015 — PK-47+128 · Identificación de estructuras enterradas  [m²],15,CIV,3001545,m²
+016 — PK-47+128 · Excavación manual (incluye retiro a botadero autorizado)  [m3],16,CIV,3000642,m3
+017 — PK-47+128 · Relleno (compactado)  [m3],17,CIV,3000872,m3
+018 — PK-47+128 · Perforacion vertical  [m],18,CIV,3012173,m
+019 — PK-47+128 · Suministro de materiales y construcción de caseta tipo bunker de dos espacios para URPC  [Und],19,CIV,3000649,Und
+020 — PK-47+128 · Suministro e instalación de candado antipalanca anticizalla de seguridad  [und],20,CIV,3023695,und
+021 — PK-47+128 · Medición de equipotencialidad  [Und],21,ELE,3002737,Und
+022 — PK-47+128 · Suministro e instalación de bandeja portacables  [m],22,ELE, ,m
+023 — PK-47+128 · Instalación y tendido de cable de Protección Catódica  [m],23,ELE,3001496,m
+"024 — PK-47+128 · Suministro, instalacion y tendido de de cable de cobre desnudo No 2/0 AWG  [m]",24,ELE,3001976,m
+"025 — PK-47+128 · Suministro e instalación de caja de conexión para negativos, NEMA 4X, 32 cm x 18 cm x 14 cm  [Und]",25,ELE,3000768,Und
+"026 — PK-47+128 · Suministro e instalación de caja de conexión para positivos, NEMA 4X, 32 cm x 18 cm x 14 cm  [Und]",26,ELE,3001148,Und
+"027 — PK-47+128 · Suministro e instalación de tubería conduit galvanizada IMC de 1 1/2""  [m]",27,ELE,3002339,m
+028 — PK-47+128 · Suministro de Transformador de 15 KVA convencional tipo poste  [Und],28,ELE,3001129,Und
+029 — PK-47+128 · Suministro e instalación de acometida AC en línea  [m],29,ELE,3010072,m
+"030 — PK-47+128 · Suministro e instalación de varilla de puesta a tierra cooper weld certificado ø5/8"" longitud 2.44 m  [Und]",30,ELE,3001150,Und
+"031 — PK-47+128 · Suministro de accesorios e instalación conjunto ct (centro de transformación) bifásico en poste, hasta 25 kVA  [Und]",31,ELE,3026477,Und
+032 — PK-47+128 · Suministro e instalación de elementos de seguridad para acometidas aéreas.  [Und],32,ELE,3026479,Und
+"033 — PK-47+128 · Suministro e instalación de poste anular de concreto pretensado, 12m, 1050 kgf  [Und]",33,ELE,3026495,Und
+034 — PK-47+128 · Suministro de seccionador monopolar para redes de 27 kVA  [Und],34,ELE,3026499,Und
+035 — PK-47+128 · Instalación de unidad de monitoreo remoto en rectificadores de protección catódica  [Und],35,COR,3035047,Und
+036 — PK-47+128 · Evaluación de potenciales de protección catódica  [km],36,COR,3026528,km
+037 — PK-47+128 · Precomisionamiento y puesta en marcha en línea  [Und],37,COR,3026529,Und
+038 — PK-47+128 · Suministro y aplicación de soldadura exotérmica de cables carga 15 g cable a estructura  [Und],38,COR,3001984,Und
+039 — PK-47+128 · Instalación de Rectificador de protección catódica  [Und],39,COR,3012251,Und
+040 — PK-47+128 · Instalación de ánodo en cama profunda y semiprofunda  [und],40,COR,3012190,und
+041 — PK-47+128 · Suministro e instalacion de estacion de prueba en linea  [Und],41,COR,3012259,Und
+042 — PK-47+128 · Instalación de electrodo de referencia permanente para estructuras enterradas  [und],42,COR,3012260,und
+043 — PK-47+128 · Suministro y ejecución de empalme en derivación tipo Splice Kit 90B-1/82-A2N o similar  [km],43,COR,3012264,km
+044 — PK-47+128 · Inspección de Potenciales a Intervalos Cortos - CIPS  [km],44,COR,3012284,km
+045 — PK-321+100 · Movilización y desmovilización  [Und],45,CIV,3000672,Und
+046 — PK-321+100 · Campamento de obra (Instalaciones temporales)  [Und],46,CIV,3001334,Und
+047 — PK-321+100 · Identificación de estructuras enterradas  [m²],47,CIV,3001545,m²
+048 — PK-321+100 · Excavación manual (incluye retiro a botadero autorizado)  [m3],48,CIV,3000642,m3
+049 — PK-321+100 · Relleno (compactado)  [m3],49,CIV,3000872,m3
+050 — PK-321+100 · Perforacion vertical  [m],50,CIV,3012173,m
+051 — PK-321+100 · Suministro de materiales y construcción de caseta tipo bunker de dos espacios para URPC  [Und],51,CIV,3000649,Und
+052 — PK-321+100 · Suministro e instalación de candado antipalanca anticizalla de seguridad  [und],52,CIV,3023695,und
+053 — PK-321+100 · Medición de equipotencialidad  [Und],53,ELE,3002737,Und
+054 — PK-321+100 · Suministro e instalación de bandeja portacables  [m],54,ELE,3002737,m
+055 — PK-321+100 · Instalación y tendido de cable de Protección Catódica  [m],55,ELE,3001496,m
+"056 — PK-321+100 · Suministro, instalacion y tendido de de cable de cobre desnudo No 2/0 AWG  [m]",56,ELE,3001976,m
+"057 — PK-321+100 · Suministro e instalación de caja de conexión para negativos, NEMA 4X, 32 cm x 18 cm x 14 cm  [Und]",57,ELE,3000768,Und
+"058 — PK-321+100 · Suministro e instalación de caja de conexión para positivos, NEMA 4X, 32 cm x 18 cm x 14 cm  [Und]",58,ELE,3001148,Und
+"059 — PK-321+100 · Suministro e instalación de tubería conduit galvanizada IMC de 1 1/2""  [m]",59,ELE,3002339,m
+060 — PK-321+100 · Suminstro de transformador de hasta 30 KVA tipo paudmounted o pedestal  [Und],60,ELE,3002892,Und
+061 — PK-321+100 · Suministro e instalación de acometida AC en línea  [m],61,ELE,3010072,m
+"062 — PK-321+100 · Suministro e instalación de varilla de puesta a tierra cooper weld certificado ø5/8"" longitud 2.44 m  [Und]",62,ELE,3001150,Und
+"063 — PK-321+100 · Suministro de accesorios e instalación conjunto ct (centro de transformación) trifásico en poste, hasta 45 kVA  [Und]",63,ELE,3026478,Und
+064 — PK-321+100 · Suministro e instalación de elementos de seguridad para acometidas aéreas.  [Und],64,ELE,3026479,Und
+"065 — PK-321+100 · Suministro e instalación de poste anular de concreto pretensado, 12m, 1050 kgf  [Und]",65,ELE,3026495,Und
+066 — PK-321+100 · Suministro de seccionador monopolar para redes de 27 kVA  [Und],66,ELE,3026499,Und
+067 — PK-321+100 · Instalación de unidad de monitoreo remoto en rectificadores de protección catódica  [Und],67,COR,3035047,Und
+068 — PK-321+100 · Evaluación de potenciales de protección catódica  [km],68,COR,3026528,km
+069 — PK-321+100 · Precomisionamiento y puesta en marcha en línea  [Und],69,COR,3026529,Und
+070 — PK-321+100 · Suministro y aplicación de soldadura exotérmica de cables carga 15 g cable a estructura  [Und],70,COR,3001984,Und
+071 — PK-321+100 · Instalación de Rectificador de protección catódica  [Und],71,COR,3012251,Und
+072 — PK-321+100 · Instalación de ánodo en cama profunda y semiprofunda  [und],72,COR,3012190,und
+073 — PK-321+100 · Suministro e instalacion de estacion de prueba en linea  [Und],73,COR,3012259,Und
+074 — PK-321+100 · Instalación de electrodo de referencia permanente para estructuras enterradas  [und],74,COR,3012260,und
+075 — PK-321+100 · Suministro y ejecución de empalme en derivación tipo Splice Kit 90B-1/82-A2N o similar  [km],75,COR,3012264,km
+076 — PK-321+100 · Inspección de Potenciales a Intervalos Cortos - CIPS  [km],76,COR,3012284,km
+078 — PK-47+128 · Suministro de unidad de monitoreo remoto en rectificadores de protección catódica  [Und],78,COR,3026504,Und
+"079 — PK-47+128 · Suministro de ánodo de MMO LIDA ONE o similar 1"" x 60"" con 80 m de cable HMWPE No. 8 AWG  [Und]",79,COR,3012210,Und
+"080 — PK-47+128 · Suministro de ánodo de MMO LIDA ONE o similar 1"" x 45"" con 60 m de cable HMWPE No. 8 AWG  [Und]",80,COR,3012216,Und
+"081 — PK-47+128 · Suministro de Rectificador de corriente para protección catódica, potencia de salida DC mayor a 5000 W, enfriado por aceite NEMA 7  [Und]",81,COR,3012255,Und
+082 — PK-47+128 · Suministro de electrodo de referencia permanente cucuso4 IR FREE con 20 m de cable RHHN AWG #12  [Und],82,COR,3012261,Und
+083 — PK-47+128 · Suministro de Coque calcinado de petróleo Loresco SC3 o DW1 (según aplique)  [Kg],83,COR,3005961,Kg
+084 — PK-321+100 · Suministro de unidad de monitoreo remoto en rectificadores de protección catódica  [Und],84,COR,3026504,Und
+"085 — PK-321+100 · Suministro de ánodo de MMO LIDA ONE o similar 1"" x 60"" con 80 m de cable HMWPE No. 8 AWG  [Und]",85,COR,3012210,Und
+"086 — PK-321+100 · Suministro de ánodo de MMO LIDA ONE o similar 1"" x 45"" con 60 m de cable HMWPE No. 8 AWG  [Und]",86,COR,3012216,Und
+"087 — PK-321+100 · Suministro de Rectificador de corriente para protección catódica, potencia de salida DC mayor a 5000 W, enfriado por aceite NEMA 7  [Und]",87,COR,3012255,Und
+088 — PK-321+100 · Suministro de electrodo de referencia permanente cucuso4 IR FREE con 20 m de cable RHHN AWG #12  [Und],88,COR,3012261,Und
+089 — PK-321+100 · Suministro de Coque calcinado de petróleo Loresco SC3 o DW1 (según aplique)  [Kg],89,COR,3005961,Kg
+091 — PK-13+300 · Movilización y desmovilización  [Und],91,CIV,3000672,Und
+092 — PK-13+300 · Elaboración de la Ingeniería de Detalle en línea  [Und],92,COR,3000933,Und
