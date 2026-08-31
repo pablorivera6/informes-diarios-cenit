@@ -184,7 +184,7 @@ def _miniatura(blob: bytes, caja: tuple[int, int], modo: str) -> bytes:
 
 
 for clave, defecto in [
-    ("capturado", None), ("plantilla_bytes", None), ("wb", None),
+    ("capturado", None), ("plantilla_bytes", None), ("ctx", None),
     ("fotos_bytes", {}), ("salida", None),
 ]:
     st.session_state.setdefault(clave, defecto)
@@ -245,22 +245,24 @@ with col_b:
         try:
             raw = rpt_file.read()
             st.session_state.plantilla_bytes = raw
-            st.session_state.wb = cr.abrir_libro(raw)
-            wb = st.session_state.wb
-            pill(f"Informe N.° <strong>{cr.leer_consecutivo_actual(wb)}</strong> "
-                 f"&nbsp;·&nbsp; <strong>{len([i for i in cr.leer_items(wb) if not i['es_encabezado']])}</strong> "
-                 f"ítems en el catálogo")
+            # El libro se lee una sola vez y se descarta: openpyxl lo expande a
+            # ~1 GB y conservarlo tumbaba la app por memoria en la nube.
+            with st.spinner("Leyendo el libro maestro (unos segundos)..."):
+                st.session_state.ctx = cr.construir_contexto(raw)
+            ctx = st.session_state.ctx
+            pill(f"Informe N.° <strong>{ctx['consecutivo_actual']}</strong> "
+                 f"&nbsp;·&nbsp; <strong>{len(ctx['items'])}</strong> ítems en el catálogo")
         except Exception as e:
             pill(f"Error al leer el informe: {e}", "err")
 
-if st.session_state.capturado is None or st.session_state.wb is None:
+if st.session_state.capturado is None or st.session_state.ctx is None:
     pill("Carga los dos archivos para continuar.", "warn")
     st.stop()
 
 cap = st.session_state.capturado
-wb = st.session_state.wb
-dia1 = cr.leer_dia1(wb)
-consec_prev = cr.leer_consecutivo_actual(wb)
+ctx = st.session_state.ctx
+dia1 = ctx["dia1"]
+consec_prev = ctx["consecutivo_actual"]
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -299,7 +301,7 @@ if consecutivo != consec_prev + 1:
         f"{consec_prev + 1}."
     )
 
-ya = cr.dia_ya_tiene_datos(wb, consecutivo)
+ya = cr.dia_ya_tiene_datos_ctx(ctx, consecutivo)
 if any(ya.values()):
     bloqueantes.append((
         f"El día {consecutivo} ya tiene datos cargados",
@@ -314,11 +316,11 @@ for titulo, texto in bloqueantes:
     bloqueo(titulo, texto)
 for a in avisos_fecha:
     pill(a, "warn")
-notas("Notas sobre la plantilla", cr.detectar_datos_manuales(wb))
+notas("Notas sobre la plantilla", ctx["avisos_manuales"])
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-datos, avisos = armado.construir(cap, wb, int(consecutivo), st.session_state.fotos_bytes)
+datos, avisos = armado.construir(cap, ctx, int(consecutivo), st.session_state.fotos_bytes)
 det = datos["_detalle"]
 
 # Un ítem sobre-ejecutado exige decisión; que falte una sección del formulario
@@ -424,8 +426,7 @@ modo = st.radio(
          "«Llenar» recorta arriba y abajo.",
 )
 
-# Medir las cajas una sola vez: abrir el libro cuesta ~6 s.
-cajas = [cr.medir_slot(wb, i) for i in range(cr.MAX_FOTOS)]
+cajas = ctx["cajas"]
 
 faltantes = [f for f in cap["fotos"] if f["filename"] not in st.session_state.fotos_bytes]
 if faltantes:

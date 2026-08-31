@@ -91,11 +91,12 @@ def _resolver_recursos(capturados, catalogo, campo_cat, campo_cap, etiqueta, avi
 
 # ── Armado del dict final ─────────────────────────────────────────────────────
 
-def construir(capturado: dict, wb, consecutivo: int,
+def construir(capturado: dict, contexto: dict, consecutivo: int,
               fotos_bytes: dict[str, bytes] | None = None) -> tuple[dict, list[str]]:
     """
     capturado    salida de fastfield.parse_submission
-    wb           libro maestro abierto con cenit_report.abrir_libro
+    contexto     salida de cenit_report.construir_contexto (NO el libro: se
+                 evita conservar en memoria los ~1 GB que expande openpyxl)
     consecutivo  del informe a generar
     fotos_bytes  {filename: bytes} descargados de la API de FastField
 
@@ -104,9 +105,9 @@ def construir(capturado: dict, wb, consecutivo: int,
     avisos = list(capturado.get("avisos") or [])
     fotos_bytes = fotos_bytes or {}
 
-    items_cat   = [i for i in cr.leer_items(wb) if not i["es_encabezado"]]
-    cargos_cat  = cr.leer_cargos(wb)
-    equipos_cat = cr.leer_equipos(wb)
+    items_cat   = contexto["items"]
+    cargos_cat  = contexto["cargos"]
+    equipos_cat = contexto["equipos"]
 
     items = _resolver_items(capturado.get("items") or [], items_cat, avisos)
     mano_obra = _resolver_recursos(
@@ -122,7 +123,7 @@ def construir(capturado: dict, wb, consecutivo: int,
         avances[it["row_num"]] = avances.get(it["row_num"], 0) + it["cantidad"]
 
     # Filas del bloque de recursos del informe (693-711), cruzadas por etiqueta
-    filas_mo, filas_eq = cr.mapa_filas_recursos(wb)
+    filas_mo, filas_eq = contexto["filas_mo"], contexto["filas_eq"]
 
     datos = {
         "consecutivo": consecutivo,
@@ -154,6 +155,8 @@ def construir(capturado: dict, wb, consecutivo: int,
             {"row_num": filas_eq[r["row_num"]], "horas": r["fuera_servicio"]}
             for r in equipos if r["fuera_servicio"] and r["row_num"] in filas_eq
         ],
+        "cajas": contexto.get("cajas"),
+        "ultimas_celdas": contexto.get("ultimas_celdas"),
         "fotos": [
             {
                 "image_bytes": fotos_bytes.get(f["filename"]),

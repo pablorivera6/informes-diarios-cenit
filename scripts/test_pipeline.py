@@ -189,12 +189,13 @@ for a in cap["avisos"]:
 
 print("\n── Armado contra el libro maestro ───────────────────────────────────")
 plantilla_bytes = PLANTILLA.read_bytes()
-wb0 = cr.abrir_libro(plantilla_bytes)
-consecutivo = cr.fecha_a_consecutivo(cap["fecha"], cr.leer_dia1(wb0))
+ctx = cr.construir_contexto(plantilla_bytes)
+wb0 = cr.abrir_libro(plantilla_bytes)          # para las comprobaciones directas
+consecutivo = cr.fecha_a_consecutivo(cap["fecha"], ctx["dia1"])
 check("consecutivo derivado de la fecha", consecutivo, 140)
 
 fotos_bytes = {"IMG_001.jpg": foto("1"), "IMG_002.jpg": foto("2"), "IMG_003.jpg": foto("3")}
-datos, avisos = armado.construir(cap, wb0, consecutivo, fotos_bytes)
+datos, avisos = armado.construir(cap, ctx, consecutivo, fotos_bytes)
 
 check("actividades recortadas al tope", len(datos["actividades"]), 28)
 check("jornadas recortadas al tope", len(datos["jornadas"]), 2)
@@ -275,6 +276,9 @@ datos_final = {
     "modo_foto": "llenar",
 }
 check_true("datos_final sin la clave interna _detalle", "_detalle" not in datos_final)
+check("el contexto trae las 10 cajas medidas", len(ctx["cajas"]), 10)
+check_true("contexto liviano (<100 KB)", len(__import__("pickle").dumps(ctx)) < 100_000,
+           f'{len(__import__("pickle").dumps(ctx))/1024:.0f} KB')
 
 salida2 = cr.generar_informe(plantilla_bytes, datos_final)
 wb2 = openpyxl.load_workbook(io.BytesIO(salida2), data_only=True)

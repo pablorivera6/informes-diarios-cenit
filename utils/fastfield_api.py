@@ -6,6 +6,8 @@ Credenciales almacenadas en st.secrets:
     fastfield_password = "password"
     fastfield_org_id   = "ORG_ID"   (opcional, si la cuenta tiene varias orgs)
 """
+from __future__ import annotations
+
 import base64
 import io
 import requests

@@ -369,6 +369,70 @@ def ajustar_imagen(image_bytes: bytes, box_px: tuple[int, int],
     return buf.getvalue()
 
 
+# ══ Contexto ligero ═══════════════════════════════════════════════════════════
+
+def construir_contexto(xlsx_bytes) -> dict:
+    """
+    Extrae de una sola pasada todo lo que la interfaz necesita del libro, para
+    NO tener que conservarlo en memoria.
+
+    Motivo: openpyxl expande este libro a ~1 GB de RSS (las hojas ocultas son de
+    848x786 y 1114x778). Guardarlo en session_state para consultar ~92 ítems,
+    10 cargos y 11 equipos hacía que la app superara el límite de memoria de
+    Streamlit Community Cloud. El contexto pesa unos pocos KB.
+    """
+    if hasattr(xlsx_bytes, "read"):
+        xlsx_bytes = xlsx_bytes.read()
+    wb = abrir_libro(xlsx_bytes)
+    try:
+        filas_mo, filas_eq = mapa_filas_recursos(wb)
+        return {
+            "dia1": leer_dia1(wb),
+            "consecutivo_actual": leer_consecutivo_actual(wb),
+            "items": [i for i in leer_items(wb) if not i["es_encabezado"]],
+            "cargos": leer_cargos(wb),
+            "equipos": leer_equipos(wb),
+            "filas_mo": filas_mo,
+            "filas_eq": filas_eq,
+            "cajas": [medir_slot(wb, i) for i in range(MAX_FOTOS)],
+            "ultimas_celdas": [medir_ultima_celda(wb, i) for i in range(MAX_FOTOS)],
+            "dias_con_datos": _dias_con_datos(wb),
+            "avisos_manuales": detectar_datos_manuales(wb),
+        }
+    finally:
+        wb.close()
+
+
+def _dias_con_datos(wb) -> dict[int, dict[str, int]]:
+    """
+    Cuántos registros tiene ya cada día en cada matriz.
+
+    Se recorre con iter_rows, no celda por celda: con ws.cell() el barrido
+    tardaba 21 s, así baja a medio segundo.
+    """
+    conteo: dict[int, dict[str, int]] = {}
+    for hoja, clave, f0, f1 in (
+        (SH_COSTO,   "avances", COSTO_FILA_INI, COSTO_FILA_FIN),
+        (SH_HH,      "hh",      HH_FILA_INI,    HH_FILA_FIN),
+        (SH_EQUIPOS, "equipos", EQ_FILA_INI,    EQ_FILA_FIN),
+    ):
+        ws = wb[hoja]
+        base = _COL_DIA1[hoja]
+        for fila in ws.iter_rows(min_row=f0, max_row=min(f1, ws.max_row),
+                                 min_col=base, values_only=True):
+            for i, v in enumerate(fila):
+                if isinstance(v, (int, float)) and v:
+                    conteo.setdefault(i + 1, {"avances": 0, "hh": 0, "equipos": 0})
+                    conteo[i + 1][clave] += 1
+    return conteo
+
+
+def dia_ya_tiene_datos_ctx(contexto: dict, consecutivo: int) -> dict:
+    return contexto["dias_con_datos"].get(
+        consecutivo, {"avances": 0, "hh": 0, "equipos": 0}
+    )
+
+
 # ══ Limpieza del día anterior ═════════════════════════════════════════════════
 
 # Filas 710-711 traen datos escritos a mano (Cadenero / Operador de cama Baja
@@ -499,6 +563,8 @@ def generar_informe(template_bytes, datos: dict) -> bytes:
       eq_disponible      list   [{row_num, horas}]     -> Z693:Z711
       eq_fuera_servicio  list   [{row_num, horas}]     -> AB693:AB711
       fotos              list   [{image_bytes, descripcion}] (10 máx.)
+      cajas              list   tamaños de caja, de construir_contexto (opcional)
+      ultimas_celdas     list   px de la última celda de cada caja (opcional)
       modo_foto          str    "contener" (default) o "llenar"
     """
     if hasattr(template_bytes, "read"):
@@ -590,8 +656,10 @@ def _escribir_fotos(w: XlsxZipWriter, datos: dict, template_bytes: bytes):
     # Idempotencia: si se regenera el informe, no duplicar anclajes
     w.remove_pictures_named(SH_FOTOS, FOTO_NAME_PREFIX)
 
-    # Medimos las cajas sobre el propio libro (anchos de columna y altos de fila)
-    wb = openpyxl.load_workbook(io.BytesIO(template_bytes), data_only=True)
+    # Si el llamador ya midió las cajas (construir_contexto lo hace), evitamos
+    # reabrir el libro aquí: son ~500 MB de más en el momento de generar.
+    cajas = datos.get("cajas")
+    wb = None if cajas else openpyxl.load_workbook(io.BytesIO(template_bytes), data_only=True)
 
     for idx, foto in enumerate(fotos):
         r0, c0, r1, c1, fila_desc, col_desc = PHOTO_SLOTS[idx]
@@ -604,8 +672,12 @@ def _escribir_fotos(w: XlsxZipWriter, datos: dict, template_bytes: bytes):
         if not img:
             continue
 
-        png = ajustar_imagen(img, medir_slot(wb, idx), datos.get("modo_foto"))
-        ult_col_px, ult_fila_px = medir_ultima_celda(wb, idx)
+        caja = cajas[idx] if cajas else medir_slot(wb, idx)
+        png = ajustar_imagen(img, caja, datos.get("modo_foto"))
+        ult_col_px, ult_fila_px = (
+            datos["ultimas_celdas"][idx] if datos.get("ultimas_celdas")
+            else medir_ultima_celda(wb, idx)
+        )
 
         w.insert_picture(
             SH_FOTOS,

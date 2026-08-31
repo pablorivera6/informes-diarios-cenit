@@ -21,6 +21,8 @@ añadidas para Cenit:
      Ecopetrol solo sabía sobrescribir imágenes placeholder ya existentes; la
      plantilla de Cenit no tiene ninguna.
 """
+from __future__ import annotations
+
 import io
 import re
 import zipfile

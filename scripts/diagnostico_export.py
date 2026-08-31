@@ -7,6 +7,8 @@ y muestra exactamente dónde no coinciden los nombres.
 
     python3 scripts/diagnostico_export.py <export_de_fastfield.xlsx>
 """
+from __future__ import annotations
+
 import io
 import sys
 from pathlib import Path
@@ -157,10 +159,10 @@ def main():
     plantilla = Path.home() / "Downloads" / "2026-08-22_8000008746_ODS03_Informe_Diario_139.xlsx"
     if plantilla.exists() and cap["fecha"]:
         from utils import armado
-        wb0 = cr.abrir_libro(plantilla.read_bytes())
-        consec = cr.fecha_a_consecutivo(cap["fecha"], cr.leer_dia1(wb0))
+        ctx = cr.construir_contexto(plantilla.read_bytes())
+        consec = cr.fecha_a_consecutivo(cap["fecha"], ctx["dia1"])
         print(f"\nRESOLUCIÓN CONTRA EL LIBRO (consecutivo {consec})\n")
-        datos, avisos = armado.construir(cap, wb0, max(1, consec))
+        datos, avisos = armado.construir(cap, ctx, max(1, consec))
         det = datos["_detalle"]
         print(f"  ítems resueltos     {len(det['items'])}/{len(cap['items'])}")
         print(f"  cargos resueltos    {len(det['mano_obra'])}/{len(cap['mano_obra'])}")
