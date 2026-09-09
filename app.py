@@ -353,16 +353,32 @@ rc1, rc2 = st.columns(2, gap="large")
 with rc1:
     if det["mano_obra"]:
         st.dataframe(pd.DataFrame([{
-            "Cargo": m["resuelto"], "Fila HH": m["row_num"],
-            "Horas": m["horas"], "Disponible": m["disponible"],
+            "Cargo": m["resuelto"],
+            "Pers.": m.get("cantidad", 1),
+            "Inicio": m.get("hora_inicio") or "—",
+            "Fin": m.get("hora_fin") or "—",
+            "Horas c/u": m["horas"],
+            "HH total": round(m.get("cantidad", 1) * m["horas"], 2),
+            "Disponible": m["disponible"],
         } for m in det["mano_obra"]]), width="stretch", hide_index=True)
+        st.markdown(
+            '<p style="font-size:12px;color:#8B949E;margin:2px 0 0;">'
+            'Las horas se calculan de inicio y fin cuando el formulario no trae '
+            '«Horas laboradas». Lo que va a la matriz HH es <strong>HH total</strong> '
+            '(personas × horas).</p>', unsafe_allow_html=True)
     else:
         vacio("Sin mano de obra reportada.")
 with rc2:
     if det["equipos"]:
         st.dataframe(pd.DataFrame([{
-            "Equipo": e["resuelto"], "Horas": e["horas"],
-            "Disponible": e["disponible"], "Fuera servicio": e["fuera_servicio"],
+            "Equipo": e["resuelto"],
+            "Cant.": e.get("cantidad", 1),
+            "Inicio": e.get("hora_inicio") or "—",
+            "Fin": e.get("hora_fin") or "—",
+            "Horas c/u": e["horas"],
+            "Total": round(e.get("cantidad", 1) * e["horas"], 2),
+            "Disponible": e["disponible"],
+            "Fuera serv.": e["fuera_servicio"],
         } for e in det["equipos"]]), width="stretch", hide_index=True)
     else:
         vacio("Sin equipos reportados: el formulario todavía no tiene "

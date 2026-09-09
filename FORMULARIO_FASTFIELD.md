@@ -100,10 +100,35 @@ Alimenta la matriz oculta `HH`.
 | # | Pregunta | Tipo | Destino |
 |---|---|---|---|
 | 16 | **Cargo** | Dropdown | `HH` columna del día |
-| 17 | **Horas laboradas** | Number | `HH` columna del día |
-| 18 | **Horas disponible (presente pero sin laborar)** | Number, opcional | `1. Informe Diario` col. M |
+| 17 | **Cantidad de personas** | Number | multiplica las horas |
+| 18 | **Hora de inicio** | Time | se usa para calcular |
+| 19 | **Hora final** | Time | se usa para calcular |
+| 20 | **Horas laboradas** | Number, opcional | si viene, tiene prioridad |
+| 21 | **Horas disponible (presente pero sin laborar)** | Number, opcional | `1. Informe Diario` col. M |
 
-Opciones (de `catalogos/cargos.csv`):
+### Cómo se calculan las horas
+
+```
+HH que van a la matriz = Cantidad de personas × horas laboradas
+```
+
+Las horas laboradas salen, en este orden:
+
+1. Del campo **Horas laboradas**, si viene con valor.
+2. Si no, de la diferencia entre **Hora de inicio** y **Hora final**.
+
+Un turno que cruza la medianoche se resuelve solo: `22:00 → 06:00` da 8 horas,
+no −16. Y las horas se aceptan en los tres formatos que manda FastField (hora,
+fracción de día o texto tipo `4:30 PM`).
+
+Ejemplo: `Ingeniero, 2 personas, 07:00 → 17:00` produce **20 HH**.
+
+> El nombre del campo **Cargo** es lo que identifica esta página. Da igual cómo
+> nombres las horas —«Hora de inicio», «Hora inicio», «Hora inicial»— porque el
+> parser reconoce la página por `Cargo`, no por el conjunto de columnas. Sin eso
+> se confundiría con la página de jornada, que también captura horas.
+
+Opciones de **Cargo** (de `catalogos/cargos.csv`):
 Director de Obra · Ing. especialista SPC · Residente de Obra ·
 Profesional programación y Control de obra · Ingeniero · Profesional HSE ·
 **Profesional QA QC (fila 13)** · Analista de operaciones ·
@@ -113,6 +138,12 @@ Profesional programación y Control de obra · Ingeniero · Profesional HSE ·
 > AD y CV). Si se unifican en una sola opción, la app no puede saber a qué fila
 > escribir.
 
+> **Límite conocido:** la matriz `HH` tiene una fila por *persona* (columnas
+> NOMBRE / CARGO / CÉDULA) y el informe cuenta el personal con COUNTIFS sobre
+> esas filas. Como el formulario captura «Cargo + Cantidad» sin nombres, las
+> HH totales quedan bien pero la columna CANT. del informe mostrará 1 en vez
+> de N. La app lo avisa.
+
 ---
 
 ## Página 6 — Equipos · repetible
@@ -121,10 +152,15 @@ Alimenta la matriz oculta `EQUIPOS`.
 
 | # | Pregunta | Tipo | Destino |
 |---|---|---|---|
-| 19 | **Tipo de equipo** | Dropdown | `EQUIPOS` columna del día |
-| 20 | **Horas laboradas** | Number | `EQUIPOS` columna del día |
-| 21 | **Horas disponible (en sitio sin operar)** | Number, opcional | `1. Informe Diario` col. Z |
-| 22 | **Horas fuera de servicio** | Number, opcional | `1. Informe Diario` col. AB |
+| 22 | **Tipo de equipo** | Dropdown | `EQUIPOS` columna del día |
+| 23 | **Cantidad** | Number, opcional | multiplica las horas |
+| 24 | **Hora de inicio / Hora final** | Time, opcional | igual que en mano de obra |
+| 25 | **Horas laboradas** | Number | `EQUIPOS` columna del día |
+| 26 | **Horas disponible (en sitio sin operar)** | Number, opcional | `1. Informe Diario` col. Z |
+| 27 | **Horas fuera de servicio** | Number, opcional | `1. Informe Diario` col. AB |
+
+Las horas se calculan igual que en mano de obra: si no pones «Horas laboradas»,
+se derivan de la hora de inicio y la hora final.
 
 Opciones: Camioneta 4x4 · Equipo Soldadura · Herramienta menor · Retroexcavadora ·
 Pica y Pala · Equipo Topografico · Martillo neumatico · Pinza electrica ·

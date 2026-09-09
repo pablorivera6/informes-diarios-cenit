@@ -80,6 +80,48 @@ def _hora(val) -> str:
     return txt
 
 
+def horas_entre(inicio: str, fin: str) -> float | None:
+    """
+    Horas decimales entre dos "HH:MM". None si alguna falta o no se entiende.
+
+    Si el fin es menor que el inicio se asume que la jornada cruzó la
+    medianoche y se suman 24 h (turnos nocturnos).
+    """
+    if not inicio or not fin:
+        return None
+    try:
+        hi, mi = (int(x) for x in inicio.split(":")[:2])
+        hf, mf = (int(x) for x in fin.split(":")[:2])
+    except (ValueError, IndexError):
+        return None
+    minutos = (hf * 60 + mf) - (hi * 60 + mi)
+    if minutos < 0:
+        minutos += 24 * 60
+    return round(minutos / 60, 3)
+
+
+def _horas_del_registro(f: dict) -> tuple[float, str, str]:
+    """
+    Horas laboradas de una fila, con sus horas de inicio y fin.
+
+    Si el formulario trae 'Horas laboradas' con valor, ese manda. Si no, se
+    calculan de la hora de inicio y la hora de fin.
+    """
+    inicio = _hora(_buscar(f, "Hora de inicio", "Hora inicio", "Hora inicial",
+                           "Inicio"))
+    fin = _hora(_buscar(f, "Hora final", "Hora fin", "Hora de fin", "Fin"))
+
+    explicitas = _num(_buscar(f, "Horas laboradas", "Horas trabajadas"))
+    if explicitas:
+        return explicitas, inicio, fin
+
+    calculadas = horas_entre(inicio, fin)
+    if calculadas is not None:
+        return calculadas, inicio, fin
+
+    return _num(_buscar(f, "Horas")) or 0, inicio, fin
+
+
 def _fecha(val) -> date | None:
     if val is None:
         return None
@@ -96,19 +138,26 @@ def _fecha(val) -> date | None:
     return None
 
 
-# ── Firmas de los subformularios ──────────────────────────────────────────────
-# Cada entrada: (clave, columnas_obligatorias, peso). Se elige, para cada hoja,
-# la firma con más columnas obligatorias presentes.
-
-# El prefijo "item" cubre tanto "Item de pago ejecutado" como "Items cenit",
-# que es como quedó nombrado el campo en el formulario real.
-_FIRMAS = [
-    ("jornada",     ["hora de inicio", "hora final"]),
-    ("items",       ["item"]),
-    ("mano_obra",   ["cargo"]),
-    ("equipos",     ["tipo de equipo"]),
-    ("actividades", ["describa la actividad", "actividad"]),
+# ── Identificación de los subformularios ──────────────────────────────────────
+#
+# Primero se buscan columnas DECISIVAS: las que solo pueden existir en una
+# página. 'Cargo' únicamente aparece en mano de obra, 'Tipo de equipo' solo en
+# equipos, etc. Esto importa porque mano de obra también captura horas de
+# inicio y fin, y si se decidiera por parecido esa página se confundiría con la
+# de jornada.
+_DECISIVAS = [
+    ("mano_obra",     ["cargo"]),
+    ("equipos",       ["tipo de equipo"]),
+    ("items",         ["item"]),
     ("observaciones", ["observacion"]),
+    ("actividades",   ["describa la actividad", "actividad"]),
+]
+
+# Sin columna decisiva, se decide por firma. La jornada no tiene ninguna propia
+# ('Frente' y las horas aparecen también en otras páginas), así que se
+# identifica por la combinación.
+_FIRMAS = [
+    ("jornada", ["hora de inicio", "hora inicio", "hora final", "hora fin"]),
 ]
 
 # Columnas de metadatos que FastField agrega a todas las hojas
@@ -118,14 +167,21 @@ _METADATOS = {
 }
 
 
+def _tiene(headers_norm: list[str], etiqueta: str) -> bool:
+    clave = norm(etiqueta)
+    return any(h == clave or h.startswith(clave) for h in headers_norm)
+
+
 def _clasificar(headers: list[str]) -> str | None:
     nh = [norm(h) for h in headers if h]
+
+    for clave, decisivas in _DECISIVAS:
+        if any(_tiene(nh, d) for d in decisivas):
+            return clave
+
     mejor, mejor_score = None, 0
-    for clave, obligatorias in _FIRMAS:
-        score = sum(
-            1 for o in obligatorias
-            if any(h == norm(o) or h.startswith(norm(o)) for h in nh)
-        )
+    for clave, columnas in _FIRMAS:
+        score = sum(1 for c in columnas if _tiene(nh, c))
         if score > mejor_score:
             mejor, mejor_score = clave, score
     return mejor
@@ -343,11 +399,14 @@ def _leer_mano_obra(filas) -> list[dict]:
         cargo = _buscar(f, "Cargo")
         if not cargo:
             continue
+        horas, inicio, fin = _horas_del_registro(f)
         out.append({
-            "cargo":      str(cargo).strip(),
-            "cantidad":   _num(_buscar(f, "Cantidad", "Cant")) or 1,
-            "horas":      _num(_buscar(f, "Horas laboradas", "Horas")) or 0,
-            "disponible": _num(_buscar(f, "Horas disponible")) or 0,
+            "cargo":       str(cargo).strip(),
+            "cantidad":    _num(_buscar(f, "Cantidad", "Cant")) or 1,
+            "horas":       horas,
+            "hora_inicio": inicio,
+            "hora_fin":    fin,
+            "disponible":  _num(_buscar(f, "Horas disponible")) or 0,
         })
     return out
 
@@ -358,10 +417,13 @@ def _leer_equipos(filas) -> list[dict]:
         tipo = _buscar(f, "Tipo de equipo")
         if not tipo:
             continue
+        horas, inicio, fin = _horas_del_registro(f)
         out.append({
             "tipo":            str(tipo).strip(),
             "cantidad":        _num(_buscar(f, "Cantidad", "Cant")) or 1,
-            "horas":           _num(_buscar(f, "Horas laboradas", "Horas")) or 0,
+            "horas":           horas,
+            "hora_inicio":     inicio,
+            "hora_fin":        fin,
             "disponible":      _num(_buscar(f, "Horas disponible")) or 0,
             "fuera_servicio":  _num(_buscar(f, "Horas fuera de servicio")) or 0,
         })
@@ -396,16 +458,9 @@ def _fmt_total(total, inicio: str, final: str) -> str:
     if n is not None:
         horas, minutos = int(n), round((n - int(n)) * 60)
         return f"{horas}:{minutos:02d}"
-    if inicio and final:
-        try:
-            hi, mi = (int(x) for x in inicio.split(":"))
-            hf, mf = (int(x) for x in final.split(":"))
-            delta = (hf * 60 + mf) - (hi * 60 + mi)
-            if delta < 0:
-                delta += 24 * 60
-            return f"{delta // 60}:{delta % 60:02d}"
-        except ValueError:
-            pass
+    h = horas_entre(inicio, final)
+    if h is not None:
+        return f"{int(h)}:{round((h - int(h)) * 60):02d}"
     return str(total).strip() if total else ""
 
 
